@@ -7,6 +7,8 @@ package UI;
 
 import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Queue;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
@@ -97,7 +99,7 @@ public class FormPrincipal extends javax.swing.JFrame {
     int datosrepetidos=0;
     boolean encontrado;
     int[] n;
-    DecimalFormat df ;
+  
     
     /*VARIABLES DE LA APLICACION    */
     private DefaultTableModel tabla;      
@@ -870,6 +872,7 @@ public class FormPrincipal extends javax.swing.JFrame {
     //METODOS DE LA APLICACION
      public void metodoCalculo(){ //tecnicamente hace todo 
           boolean faltan;
+         Queue ordenes = null;
          Double demanda;
          int mes;
         
@@ -903,7 +906,9 @@ public class FormPrincipal extends javax.swing.JFrame {
                
                          if(invFinal<=r)
                          {
-                            mesllegada =solicitarPedido(PseudoAleatorio[c]);      
+                            mesllegada =solicitarPedido(PseudoAleatorio[c]);
+                            ordenes.add(new Integer(mesllegada));
+                            
                             datos[i][6]= (double)mesllegada;
                             hayPedido=true;      
                          }
