@@ -7,6 +7,7 @@ package UI;
 
 import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import javax.swing.JOptionPane;
@@ -30,7 +31,7 @@ public class FormPrincipal extends javax.swing.JFrame {
         PanelApp.setVisible(false);
         PanelGenerador.setVisible(false);
         encontrado=false;
-        df= new DecimalFormat("#.0000");
+       // df= new DecimalFormat("#.0000");
         n= new int[2];
         //VARIABLES DE LA APLICACION
         
@@ -715,7 +716,7 @@ public class FormPrincipal extends javax.swing.JFrame {
             }
             limites+=limiteInicial;
         }
-     String cabeceraFrecuencia[]={"1","2","3","4"};
+         String cabeceraFrecuencia[]={"1","2","3","4"};
         DefaultTableModel  modelo = new DefaultTableModel(datosFrecuencia, cabeceraFrecuencia);
  
       tablaFrecuencia.setModel(modelo);
@@ -863,7 +864,7 @@ public class FormPrincipal extends javax.swing.JFrame {
        }
        
        if(c>4)
-           txtConclusionSimulacion.setText("Tienes "+c+" meses con deudas :(.\n Te quedaste sin recursos a partir del "+m+" mes.\nLos numeros que utilizaste no son adecuados para tu almacen.\nIntenta con otros ");
+           txtConclusionSimulacion.setText("Tienes "+c+" meses con deudas.\n Te quedaste sin recursos a partir del "+m+" mes.\nLos numeros que utilizaste no son adecuados para tu almacen.\nIntenta con otros ");
        else if(c<2)
            txtConclusionSimulacion.setText("Tienes"+c+" meses de deudas.\n.Te quedaste sin recursos a partir del "+m+" mes Los numeros que utilizaste son buenos para tu almacen.");
        else
@@ -872,9 +873,12 @@ public class FormPrincipal extends javax.swing.JFrame {
     //METODOS DE LA APLICACION
      public void metodoCalculo(){ //tecnicamente hace todo 
           boolean faltan;
-         Queue ordenes = null;
+          int llego=0;
+         Queue<Double> ordenes = new LinkedList();
          Double demanda;
+       
          int mes;
+         
         
          datos=new Double[12][8];
          int c=0;
@@ -882,13 +886,21 @@ public class FormPrincipal extends javax.swing.JFrame {
         
          for (int i = 0; i <12 ;i++) {
             
-            mes=(datos[i][0]=(double)i+1).intValue();//mes  
-                
-               if(mesllegada==mes) 
-               datos[i][1]=(double)invInicial+q;//inventarioinicial
-               else             
-               datos[i][1]=(double)invInicial;
-               
+               mes=(datos[i][0]=(double)i+1).intValue();//mes  
+
+                        
+                 if(llego==mes)//i
+                 {
+                     datos[i][1]=(double)invInicial+q;
+                    // hayPedido=false;
+                 }
+                 else
+                 {         
+                        datos[i][1]=(double)invInicial;
+                  }
+                        
+                       
+                    
                
                datos[i][2]=PseudoAleatorio[c];//num pseudoaleatorio nato
                
@@ -899,23 +911,23 @@ public class FormPrincipal extends javax.swing.JFrame {
                datos[i][4]=(double)invFinal;
      
                
-               datos[i][5]=Faltante(demanda,invFinal,invInicial);
+               datos[i][5]=Faltante(demanda,invFinal,invInicial);//regresa un entero
                if(datos[i][5]>0.0)faltan=true;              
                else  faltan=false;
               
                
-                         if(invFinal<=r)
-                         {
-                            mesllegada =solicitarPedido(PseudoAleatorio[c]);
-                            ordenes.add(new Integer(mesllegada));
+                if(invFinal<=r)
+                {
+                   
+                        mesllegada =solicitarPedido(PseudoAleatorio[c]);
+                        ordenes.add((double)mesllegada);//añado a la cola el mes de llegada                 
+                        datos[i][6]= (double)mesllegada;
+                       // JOptionPane.showMessageDialog(null,ordenes);
+                        hayPedido=true;  
+                    
                             
-                            datos[i][6]= (double)mesllegada;
-                            hayPedido=true;      
-                         }
-                         else
-                         {
-                         datos[i][6]=0.0;
-                         }
+                }
+                            
 
                datos[i][7]=invMensual(faltan);
      
@@ -923,7 +935,7 @@ public class FormPrincipal extends javax.swing.JFrame {
             c++;
             
             invInicial=invFinal;
-            mesllegada+=i;
+           
     
         }//fin for
         
