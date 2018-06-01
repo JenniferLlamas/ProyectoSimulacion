@@ -651,7 +651,7 @@ public class FormPrincipal extends javax.swing.JFrame {
         q=Integer.parseInt(qtext.getText());
         invInicial=Integer.parseInt(invItext.getText());
         metodoCalculo();
-        Conclusiones(datos);
+      
         
         // TODO add your handling code here:
     }//GEN-LAST:event_btnIniciarSimulacionActionPerformed
@@ -840,10 +840,11 @@ public class FormPrincipal extends javax.swing.JFrame {
         }
     }
     
-   public void Conclusiones(Double[][] datos)
+   public void Conclusiones(Double[][] datos,int contador,double costoF,double inv)
    {
        int c=0;
        int m=0;
+       int c2=0;
        for(int i=0;i<12;i++)
        {      
          if(datos[i][4]<0.0)
@@ -856,27 +857,35 @@ public class FormPrincipal extends javax.swing.JFrame {
          {
          if(datos[x][7]==0.0)
          {
+              c2++;
              m=x+1;
              break;
          }
          }
           
        }
+       double totalOrdenes=contador*100;
+       double totalInventario=inv*20*1;
+       double costoFalt=50*costoF;
        
-       if(c>4)
+       if(c2<0.0)
            txtConclusionSimulacion.setText("Tienes "+c+" meses con deudas.\n Te quedaste sin recursos a partir del "+m+" mes.\nLos numeros que utilizaste no son adecuados para tu almacen.\nIntenta con otros ");
-       else if(c<2)
-           txtConclusionSimulacion.setText("Tienes"+c+" meses de deudas.\n.Te quedaste sin recursos a partir del "+m+" mes Los numeros que utilizaste son buenos para tu almacen.");
-       else
+//       else if( c2<0)
+//           txtConclusionSimulacion.setText("Tienes"+c+" meses de deudas.\n.Te quedaste sin recursos a partir del "+m+" mes Los numeros que utilizaste son buenos para tu almacen.");
+       else if(c2>0.0&&c>0.0)
            txtConclusionSimulacion.setText("Los numeros que utilizaste son buenos para tu almacen.\n La simulacion ha sido un exito!");
+  
+     String conclusion= txtConclusionSimulacion.getText() + "\n COSTO DE ORDENAR: $" + totalOrdenes +" \n COSTO DE INVENTARIO :$ "+ totalInventario +" \n COSTO FALTANTE: $"+costoFalt;
+     txtConclusionSimulacion.setText(conclusion);
    }
     //METODOS DE LA APLICACION
      public void metodoCalculo(){ //tecnicamente hace todo 
           boolean faltan;
-          int llego=0;
-         Queue<Double> ordenes = new LinkedList();
+          boolean llego=false;
+         
          Double demanda;
-       
+         int contadorOrdenes=0;
+         double costoFaltante=0.0;
          int mes;
          
         
@@ -889,7 +898,7 @@ public class FormPrincipal extends javax.swing.JFrame {
                mes=(datos[i][0]=(double)i+1).intValue();//mes  
 
                         
-                 if(llego==mes)//i
+                 if(llego)//i
                  {
                      datos[i][1]=(double)invInicial+q;
                     // hayPedido=false;
@@ -918,19 +927,25 @@ public class FormPrincipal extends javax.swing.JFrame {
                
                 if(invFinal<=r)
                 {
-                   
-                        mesllegada =solicitarPedido(PseudoAleatorio[c]);
-                        ordenes.add((double)mesllegada);//añado a la cola el mes de llegada                 
-                        datos[i][6]= (double)mesllegada;
-                       // JOptionPane.showMessageDialog(null,ordenes);
-                        hayPedido=true;  
                     
-                            
+                         if(mesllegada>0){
+                             mesllegada--;
+                             llego=(mesllegada==0);
+                         }
+                         else{
+                         contadorOrdenes++;
+                        mesllegada =solicitarPedido(PseudoAleatorio[c]);
+                       
+                        datos[i][6]= (double)mesllegada;
+                         
+                         }
+                       // JOptionPane.showMessageDialog(null,ordenes);
+                       // hayPedido=true;  
                 }
                             
 
                datos[i][7]=invMensual(faltan);
-     
+              costoFaltante =(faltan)?datos[i][5]:0.0;
 
             c++;
             
@@ -940,6 +955,7 @@ public class FormPrincipal extends javax.swing.JFrame {
         }//fin for
         
         crearTabla();
+          Conclusiones(datos,contadorOrdenes,costoFaltante,invInicial);
     }
     
      public double checarPseudo(int indice){
@@ -995,11 +1011,7 @@ public class FormPrincipal extends javax.swing.JFrame {
         TablaResultados.setModel(tabla);
      }
      
-     public void Resultados()
-     {
-     
-     
-     }
+    
     
     /**
      * @param args the command line arguments
